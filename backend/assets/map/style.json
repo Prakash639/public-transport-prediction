@@ -1,0 +1,118 @@
+{
+    "version": 8,
+    "name": "Antigravity Offline Style",
+    "metadata": {
+        "maputnik:renderer": "mlgljs"
+    },
+    "sources": {
+        "osm": {
+            "type": "vector",
+            "tiles": [
+                "http://localhost:5000/api/map/tiles/{z}/{x}/{y}.pbf"
+            ],
+            "minzoom": 0,
+            "maxzoom": 14
+        }
+    },
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "paint": {
+                "background-color": "hsl(47, 26%, 88%)"
+            }
+        },
+        {
+            "id": "water",
+            "type": "fill",
+            "source": "osm",
+            "source-layer": "water",
+            "paint": {
+                "fill-color": "hsl(205, 56%, 73%)"
+            }
+        },
+        {
+            "id": "landuse_park",
+            "type": "fill",
+            "source": "osm",
+            "source-layer": "landuse",
+            "filter": [
+                "==",
+                "class",
+                "park"
+            ],
+            "paint": {
+                "fill-color": "hsl(100, 30%, 80%)"
+            }
+        },
+        {
+            "id": "roads_major",
+            "type": "line",
+            "source": "osm",
+            "source-layer": "transportation",
+            "filter": [
+                "in",
+                "class",
+                "primary",
+                "secondary",
+                "tertiary",
+                "trunk"
+            ],
+            "paint": {
+                "line-color": "#ffffff",
+                "line-width": {
+                    "base": 1.4,
+                    "stops": [
+                        [
+                            6,
+                            0.5
+                        ],
+                        [
+                            20,
+                            30
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "id": "roads_minor",
+            "type": "line",
+            "source": "osm",
+            "source-layer": "transportation",
+            "filter": [
+                "in",
+                "class",
+                "minor",
+                "service",
+                "track"
+            ],
+            "paint": {
+                "line-color": "#ffffff",
+                "line-width": {
+                    "base": 1.4,
+                    "stops": [
+                        [
+                            12,
+                            0.2
+                        ],
+                        [
+                            20,
+                            15
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "id": "buildings",
+            "type": "fill",
+            "source": "osm",
+            "source-layer": "building",
+            "paint": {
+                "fill-color": "hsl(35, 8%, 80%)",
+                "fill-outline-color": "hsl(35, 8%, 70%)"
+            }
+        }
+    ]
+}

@@ -92,7 +92,7 @@ const Register = () => {
                             {[
                                 { value: 'passenger', icon: '👤', label: 'Passenger' },
                                 { value: 'driver', icon: '🚗', label: 'Driver' },
-                                { value: 'admin', icon: '👨‍💼', label: 'Admin' }
+                                // { value: 'admin', icon: '👨‍💼', label: 'Admin' }
                             ].map(roleOption => (
                                 <div
                                     key={roleOption.value}

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const host = process.env.BASE_URL || 'http://localhost:5000';
+const host = process.env.BASE_URL;
 const baseUrl = `${host}/api/map`;
 
 try {

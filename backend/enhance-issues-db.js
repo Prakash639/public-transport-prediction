@@ -7,7 +7,7 @@ async function enhanceIssuesDB() {
     let connection;
     try {
         connection = await mysql.createConnection({
-            host: process.env.DB_HOST || 'localhost',
+            host: process.env.DB_HOST,
             user: process.env.DB_USER || 'root',
             password: process.env.DB_PASSWORD || '',
             database: process.env.DB_NAME || 'public_transport_db'

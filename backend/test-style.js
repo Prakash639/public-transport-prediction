@@ -1,7 +1,8 @@
-try {
-    const host = 'localhost:5000';
-    const baseUrl = `http://${host}/api/map`;
+require('dotenv').config();
+const host = process.env.BASE_URL || 'http://localhost:5000';
+const baseUrl = `${host}/api/map`;
 
+try {
     const style = {
         "version": 8,
         "name": "Local OSM Fallback",

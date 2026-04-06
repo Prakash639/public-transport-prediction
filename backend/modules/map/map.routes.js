@@ -47,9 +47,10 @@ router.get('/tiles/:z/:x/:y.pbf', async (req, res) => {
 // Route to serve style.json
 router.get('/style.json', (req, res) => {
     try {
-        const host = req.get('host') || 'localhost:5000';
-        const protocol = req.protocol || 'http';
-        const baseUrl = `${protocol}://${host}/api/map`;
+        const host = req.get('host');
+        const protocol = req.protocol;
+        const effectiveBaseUrl = process.env.BASE_URL || `${protocol}://${host}`;
+        const baseUrl = `${effectiveBaseUrl}/api/map`;
 
         const useOnlineMap = process.env.USE_ONLINE_MAP === 'true';
 
@@ -87,9 +88,16 @@ router.get('/style.json', (req, res) => {
         let style;
 
         if (fs.existsSync(stylePath)) {
-            style = JSON.parse(fs.readFileSync(stylePath, 'utf8'));
+            let styleStr = fs.readFileSync(stylePath, 'utf8');
+            // Dynamically replace {{BASE_URL}} placeholder
+            styleStr = styleStr.replace(/{{BASE_URL}}/g, effectiveBaseUrl);
+            style = JSON.parse(styleStr);
+            
             if (style.sources && style.sources.osm) {
-                style.sources.osm.tiles = [`${baseUrl}/tiles/{z}/{x}/{y}.pbf`];
+                // Also ensure tiles field is correctly set if not already handled by placeholder
+                if (!style.sources.osm.tiles[0].includes('{z}')) {
+                     style.sources.osm.tiles = [`${effectiveBaseUrl}/api/map/tiles/{z}/{x}/{y}.pbf`];
+                }
             }
         } else {
             style = {

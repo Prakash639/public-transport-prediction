@@ -8,7 +8,7 @@
         "osm": {
             "type": "vector",
             "tiles": [
-                "http://localhost:5000/api/map/tiles/{z}/{x}/{y}.pbf"
+                "{{BASE_URL}}/api/map/tiles/{z}/{x}/{y}.pbf"
             ],
             "minzoom": 0,
             "maxzoom": 14

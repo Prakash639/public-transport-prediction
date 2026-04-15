@@ -10,6 +10,11 @@ const DriverDashboard = () => {
     const [routes, setRoutes] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Active Trips List states
+    const [allActiveTrips, setAllActiveTrips] = useState([]);
+    const [loadingActive, setLoadingActive] = useState(false);
+    const [endingTripId, setEndingTripId] = useState(null);
+
     // Tracking states
     const [isTracking, setIsTracking] = useState(false);
     const [currentLocation, setCurrentLocation] = useState(null);
@@ -93,11 +98,31 @@ const DriverDashboard = () => {
     }, []);
 
     const loadInitialData = async () => {
-        const busRes = await api.get('/buses');
-        const routeRes = await api.get('/routes');
-        setBuses(busRes.data);
-        setRoutes(routeRes.data);
-        setLoading(false);
+        try {
+            const [busRes, routeRes] = await Promise.all([
+                api.get('/buses'),
+                api.get('/routes')
+            ]);
+            setBuses(busRes.data);
+            setRoutes(routeRes.data);
+            await fetchAllActiveTrips();
+        } catch (error) {
+            console.error("Error loading initial data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAllActiveTrips = async () => {
+        setLoadingActive(true);
+        try {
+            const res = await api.get('/trips/active');
+            setAllActiveTrips(res.data);
+        } catch (error) {
+            console.error("Error fetching active trips:", error);
+        } finally {
+            setLoadingActive(false);
+        }
     };
 
     // Continuous Tracking Logic
@@ -186,6 +211,7 @@ const DriverDashboard = () => {
             setActiveTrip({ trip_id: res.data.tripId, bus_id: selectedBus, route_id: selectedRoute });
             setIsTracking(true); // Automatically start tracking
             setLoading(false);
+            fetchAllActiveTrips(); // Refresh the list
         } catch (error) {
             console.error('Error starting trip', error);
             setLoading(false);
@@ -202,8 +228,36 @@ const DriverDashboard = () => {
             setCurrentLocation(null);
             // Fetch initial location again for next trip
             fetchInitialLocation(); 
+            fetchAllActiveTrips(); // Refresh the list
         } catch (error) {
             console.error('Error ending trip', error);
+        }
+    };
+
+    const handleEndSpecificTrip = async (tripId) => {
+        if (!window.confirm("Are you sure you want to end this trip?")) return;
+        
+        setEndingTripId(tripId);
+        try {
+            await api.put(`/trips/${tripId}/end`);
+            
+            // If the ended trip is the current active trip, clear it
+            if (activeTrip && activeTrip.trip_id === tripId) {
+                setActiveTrip(null);
+                setIsTracking(false);
+                setCurrentLocation(null);
+                fetchInitialLocation();
+            }
+            
+            // Refresh the list after animation delay
+            setTimeout(() => {
+                setAllActiveTrips(prev => prev.filter(t => t.trip_id !== tripId));
+                setEndingTripId(null);
+            }, 500);
+        } catch (error) {
+            console.error('Error ending trip', error);
+            setEndingTripId(null);
+            alert("Failed to end trip");
         }
     };
 
@@ -429,7 +483,111 @@ const DriverDashboard = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Active Trips Section */}
+                <div className="animate-fade-in" style={{ marginTop: '4rem' }}>
+                    <div className="section-header" style={{ justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span className="section-icon">🔥</span>
+                            <h2 style={{ fontSize: '1.75rem' }}>Active Trips</h2>
+                        </div>
+                        <button 
+                            onClick={fetchAllActiveTrips} 
+                            className="btn btn-outline" 
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                            disabled={loadingActive}
+                        >
+                            {loadingActive ? 'Refreshing...' : '🔄 Refresh'}
+                        </button>
+                    </div>
+
+                    {loadingActive && allActiveTrips.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '3rem' }}>
+                            <div className="spinner" style={{ margin: '0 auto' }}></div>
+                            <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>Fetching active trips...</p>
+                        </div>
+                    ) : allActiveTrips.length === 0 ? (
+                        <div className="card glass-card" style={{ textAlign: 'center', padding: '3rem', borderStyle: 'dashed', borderWidth: '2px' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
+                            <h3 style={{ color: 'var(--text-muted)' }}>No Active Trips Found</h3>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>All buses are currently idle.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {allActiveTrips.map((trip) => (
+                                <div 
+                                    key={trip.trip_id} 
+                                    className={`card glass-card hover-lift ${endingTripId === trip.trip_id ? 'animate-fade-out' : ''}`}
+                                    style={{ 
+                                        padding: '1.5rem', 
+                                        borderLeft: '4px solid var(--success)',
+                                        opacity: endingTripId === trip.trip_id ? 0 : 1,
+                                        transition: 'all 0.5s ease'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                        <div>
+                                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>🚌 {trip.bus_number}</h4>
+                                            <div className="badge badge-success">
+                                                <span className="status-dot active"></span>
+                                                Active
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Trip ID</div>
+                                            <div style={{ fontWeight: '700', color: 'var(--primary)' }}>#{trip.trip_id}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="info-card" style={{ background: 'var(--bg-body)', border: 'none', marginBottom: '1.5rem' }}>
+                                        <div style={{ marginBottom: '0.5rem' }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Route</div>
+                                            <div style={{ fontWeight: '600' }}>{trip.source} → {trip.destination}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Started At</div>
+                                            <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>
+                                                {new Date(trip.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginLeft: '0.5rem' }}>
+                                                    ({new Date(trip.start_time).toLocaleDateString()})
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => handleEndSpecificTrip(trip.trip_id)}
+                                        className="btn"
+                                        disabled={endingTripId === trip.trip_id}
+                                        style={{ 
+                                            width: '100%', 
+                                            background: 'rgba(239, 68, 68, 0.1)', 
+                                            color: 'var(--danger)', 
+                                            border: '1px solid var(--danger)',
+                                            padding: '0.6rem'
+                                        }}
+                                    >
+                                        {endingTripId === trip.trip_id ? 'Ending...' : '🛑 End Trip'}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Injected Animations */}
+            <style>
+                {`
+                    @keyframes fadeOut {
+                        from { opacity: 1; transform: scale(1); }
+                        to { opacity: 0; transform: scale(0.95); }
+                    }
+                    .animate-fade-out {
+                        animation: fadeOut 0.5s ease-out forwards;
+                    }
+                `}
+            </style>
         </div>
     );
 };

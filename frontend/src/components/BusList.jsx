@@ -18,7 +18,7 @@ const BusList = ({ buses, onSelectBus, selectedBusId }) => {
                         cursor: 'pointer',
                         borderBottom: '1px solid var(--border)',
                         transition: 'var(--transition)',
-                        backgroundColor: selectedBusId === bus.trip_id ? 'var(--primary-glow)' : 'transparent',
+                        backgroundColor: selectedBusId === bus.trip_id ? 'rgba(249, 115, 22, 0.06)' : 'transparent',
                         borderLeft: selectedBusId === bus.trip_id ? '4px solid var(--primary)' : '4px solid transparent',
                         position: 'relative',
                         display: 'flex',
@@ -34,7 +34,8 @@ const BusList = ({ buses, onSelectBus, selectedBusId }) => {
                         borderRadius: '12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '1.2rem',
-                        transition: 'var(--transition)'
+                        transition: 'var(--transition)',
+                        boxShadow: selectedBusId === bus.trip_id ? 'var(--shadow-orange)' : 'none'
                     }}>
                         🚌
                     </div>
@@ -47,7 +48,7 @@ const BusList = ({ buses, onSelectBus, selectedBusId }) => {
                         </div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span style={{ fontWeight: '600' }}>{bus.source}</span>
-                            <span style={{ opacity: 0.3 }}>→</span>
+                            <span style={{ opacity: 0.3, color: 'var(--primary)' }}>→</span>
                             <span style={{ fontWeight: '600' }}>{bus.destination}</span>
                         </div>
                     </div>
@@ -59,6 +60,5 @@ const BusList = ({ buses, onSelectBus, selectedBusId }) => {
         </div>
     );
 };
-
 
 export default BusList;

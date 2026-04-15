@@ -31,7 +31,6 @@ const isValidCoord = (lat, lng) => {
 
 // OSRM route-fetching utility
 const fetchOSRMRoute = async (srcLng, srcLat, destLng, destLat, signal) => {
-    // URL with extra parameters for better accuracy and shortest path
     const url = `https://router.project-osrm.org/route/v1/driving/${srcLng},${srcLat};${destLng},${destLat}?overview=full&geometries=geojson&steps=true&alternatives=false`;
     
     console.log(`[MapTracking] Fetching OSRM route: ${srcLng},${srcLat} -> ${destLng},${destLat}`);
@@ -48,9 +47,9 @@ const fetchOSRMRoute = async (srcLng, srcLat, destLng, destLat, signal) => {
     
     const route = data.routes[0];
     return {
-        geometry: route.geometry,                    // GeoJSON LineString
-        distance: (route.distance / 1000).toFixed(1), // km
-        duration: Math.round(route.duration / 60),     // minutes
+        geometry: route.geometry,
+        distance: (route.distance / 1000).toFixed(1),
+        duration: Math.round(route.duration / 60),
     };
 };
 
@@ -62,7 +61,7 @@ const MapTracking = ({ busLocation, selectedBus }) => {
 
     // OSRM route state
     const [routeGeoJSON, setRouteGeoJSON] = useState(null);
-    const [routeInfo, setRouteInfo] = useState(null);       // { distance, duration }
+    const [routeInfo, setRouteInfo] = useState(null);
     const [routeError, setRouteError] = useState(false);
 
     // Parse coordinates
@@ -84,7 +83,6 @@ const MapTracking = ({ busLocation, selectedBus }) => {
         return { latitude: parseFloat(selectedBus.dest_lat), longitude: parseFloat(selectedBus.dest_lng) };
     }, [selectedBus]);
 
-    // Compute initial center based on available data
     const initialViewState = useMemo(() => {
         if (sourcePos) return { latitude: sourcePos.latitude, longitude: sourcePos.longitude, zoom: 12 };
         return { latitude: 12.9716, longitude: 77.5946, zoom: 12 };
@@ -99,11 +97,10 @@ const MapTracking = ({ busLocation, selectedBus }) => {
         setRouteError(false);
     }, [selectedBus?.trip_id]);
 
-    // ─── Fetch OSRM road route ───────────────────────────────────────
+    // Fetch OSRM road route
     useEffect(() => {
         if (!sourcePos || !destPos) return;
 
-        // Strict boundary check for coordinates
         if (!isValidCoord(sourcePos.latitude, sourcePos.longitude) || 
             !isValidCoord(destPos.latitude, destPos.longitude)) {
             console.error('[MapTracking] Invalid coordinates for routing');
@@ -113,8 +110,8 @@ const MapTracking = ({ busLocation, selectedBus }) => {
         const abortCtrl = new AbortController();
 
         fetchOSRMRoute(
-            sourcePos.longitude, sourcePos.latitude,  // Longitude FIRST
-            destPos.longitude, destPos.latitude,      // Longitude FIRST
+            sourcePos.longitude, sourcePos.latitude,
+            destPos.longitude, destPos.latitude,
             abortCtrl.signal
         )
             .then((result) => {
@@ -137,7 +134,7 @@ const MapTracking = ({ busLocation, selectedBus }) => {
         return () => abortCtrl.abort();
     }, [sourcePos, destPos]);
 
-    // Straight-line fallback GeoJSON (ONLY used when OSRM fails)
+    // Straight-line fallback GeoJSON
     const fallbackRoute = useMemo(() => {
         if (!sourcePos || !destPos) return null;
         return {
@@ -152,10 +149,9 @@ const MapTracking = ({ busLocation, selectedBus }) => {
         };
     }, [sourcePos, destPos]);
 
-    // Route data selection: OSRM route is priority, straight-line only on crash
     const routeData = routeGeoJSON || (routeError ? fallbackRoute : null);
 
-    // ─── Fit bounds once per trip (uses every point in the route) ────
+    // Fit bounds once per trip
     useEffect(() => {
         if (!mapReady || !mapRef.current || hasFittedBounds) return;
         if (!routeData && !sourcePos && !destPos && !position) return;
@@ -163,14 +159,12 @@ const MapTracking = ({ busLocation, selectedBus }) => {
         const bounds = new maplibregl.LngLatBounds();
         let hasPoints = false;
 
-        // Extend bounds with the FULL path if available
         if (routeData?.geometry?.coordinates?.length) {
             routeData.geometry.coordinates.forEach(([lng, lat]) => {
                 bounds.extend([lng, lat]);
             });
             hasPoints = true;
         } else {
-            // Fallback points for bounds if no full route yet
             if (sourcePos) { bounds.extend([sourcePos.longitude, sourcePos.latitude]); hasPoints = true; }
             if (destPos) { bounds.extend([destPos.longitude, destPos.latitude]); hasPoints = true; }
         }
@@ -197,7 +191,6 @@ const MapTracking = ({ busLocation, selectedBus }) => {
             }
         };
 
-        // Resize on mount after a short delay
         const t1 = setTimeout(doResize, 200);
         const t2 = setTimeout(doResize, 500);
         const t3 = setTimeout(doResize, 1500);
@@ -214,7 +207,6 @@ const MapTracking = ({ busLocation, selectedBus }) => {
     const handleMapLoad = useCallback((evt) => {
         console.log('[MapTracking] Map loaded successfully');
         setMapReady(true);
-        // Force multiple resizes to handle delayed layout
         setTimeout(() => evt.target?.resize(), 100);
         setTimeout(() => evt.target?.resize(), 500);
     }, []);
@@ -222,11 +214,12 @@ const MapTracking = ({ busLocation, selectedBus }) => {
     return (
         <div
             ref={containerRef}
+            className="map-container"
             style={{
                 borderRadius: '12px',
                 overflow: 'hidden',
                 width: '100%',
-                height: '600px',      // FIXED PIXEL HEIGHT - not percentage
+                height: '600px',
                 position: 'relative'
             }}
         >
@@ -234,23 +227,23 @@ const MapTracking = ({ busLocation, selectedBus }) => {
                 initialViewState={initialViewState}
                 ref={mapRef}
                 mapLib={maplibregl}
-                style={{ width: '100%', height: '600px' }}  // FIXED PIXEL HEIGHT
+                style={{ width: '100%', height: '100%' }}
                 mapStyle={MAP_STYLE}
                 onLoad={handleMapLoad}
                 onError={(e) => console.error('[MapTracking] Error:', e)}
             >
                 <NavigationControl position="top-right" />
 
-                {/* Route Path (OSRM road route or straight-line fallback) */}
+                {/* Route Path - Orange themed */}
                 {routeData && (
                     <Source id="route-path" type="geojson" data={routeData}>
                         <Layer
                             id="route-layer-outline"
                             type="line"
                             paint={{
-                                'line-color': '#1e40af',
+                                'line-color': '#c2410c',
                                 'line-width': 8,
-                                'line-opacity': 0.3
+                                'line-opacity': 0.25
                             }}
                             layout={{ 'line-cap': 'round', 'line-join': 'round' }}
                         />
@@ -258,7 +251,7 @@ const MapTracking = ({ busLocation, selectedBus }) => {
                             id="route-layer"
                             type="line"
                             paint={{
-                                'line-color': '#3b82f6',
+                                'line-color': '#f97316',
                                 'line-width': 5,
                                 'line-opacity': 0.9
                             }}
@@ -283,7 +276,7 @@ const MapTracking = ({ busLocation, selectedBus }) => {
                             gap: '6px',
                             border: '2px solid white'
                         }}>
-                            <span style={{ fontSize: '1.1rem' }}>🏠</span>
+                            <span style={{ fontSize: '1.1rem' }}>📍</span>
                             <span>Start</span>
                         </div>
                     </Marker>
@@ -311,7 +304,7 @@ const MapTracking = ({ busLocation, selectedBus }) => {
                     </Marker>
                 )}
 
-                {/* Bus Marker */}
+                {/* Bus Marker - Orange themed */}
                 {position && (
                     <Marker
                         latitude={position.latitude}
@@ -319,13 +312,13 @@ const MapTracking = ({ busLocation, selectedBus }) => {
                         anchor="bottom"
                     >
                         <div style={{
-                            background: 'var(--primary, #2563eb)',
+                            background: '#f97316',
                             color: 'white',
                             padding: '8px 16px',
                             borderRadius: '12px',
                             fontWeight: '800',
                             fontSize: '16px',
-                            boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.5)',
+                            boxShadow: '0 10px 15px -3px rgba(249, 115, 22, 0.5)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
@@ -358,13 +351,13 @@ const MapTracking = ({ busLocation, selectedBus }) => {
                     fontWeight: '600',
                     color: '#1e293b',
                     zIndex: 10,
-                    border: '1px solid rgba(0,0,0,0.08)'
+                    border: '1px solid rgba(249, 115, 22, 0.2)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '1rem' }}>📏</span>
                         <span>{routeInfo.distance} km</span>
                     </div>
-                    <div style={{ width: '1px', height: '18px', background: '#cbd5e1' }} />
+                    <div style={{ width: '1px', height: '18px', background: '#f97316', opacity: 0.3 }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '1rem' }}>⏱️</span>
                         <span>{routeInfo.duration} min</span>

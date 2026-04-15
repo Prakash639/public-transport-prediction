@@ -7,7 +7,7 @@ import MapTracking from '../../components/MapTracking';
 
 const PassengerBusSearch = () => {
     const [routes, setRoutes] = useState([]);
-    const [selectedRouteId, setSelectedRouteId] = useState(null); // Independent tracking of selected route
+    const [selectedRouteId, setSelectedRouteId] = useState(null);
     const [activeBuses, setActiveBuses] = useState([]);
     const [selectedBus, setSelectedBus] = useState(null);
     const [busLocation, setBusLocation] = useState(null);
@@ -17,7 +17,6 @@ const PassengerBusSearch = () => {
     const [searchPerformed, setSearchPerformed] = useState(false);
     const navigate = useNavigate();
 
-    // Fetch all available routes on mount for the dropdown
     useEffect(() => {
         const fetchAllRoutes = async () => {
             try {
@@ -41,7 +40,6 @@ const PassengerBusSearch = () => {
             setSearchPerformed(true);
             setSelectedRouteId(routeId);
             
-            // Clear previous state
             setSelectedBus(null);
             setBusLocation(null);
             
@@ -51,11 +49,8 @@ const PassengerBusSearch = () => {
 
             if (res.data.length > 0) {
                 handleSelectBus(res.data[0]);
-            } else {
-                console.log('No active buses for this route');
             }
 
-            // Auto-scroll to buses section
             setTimeout(() => {
                 const resultsSection = document.getElementById('search-results');
                 if (resultsSection) {
@@ -72,8 +67,6 @@ const PassengerBusSearch = () => {
 
     const handleSelectBus = (bus) => {
         setSelectedBus(bus);
-        // Initial fetch of location or just use current if available (live_tracking might be separate)
-        // For now, let's assume we fetch latest location for this trip
         fetchBusLocation(bus.trip_id);
     };
 
@@ -82,34 +75,32 @@ const PassengerBusSearch = () => {
             const res = await api.get(`/trips/${tripId}/location`);
             setBusLocation(res.data);
         } catch (err) {
-            // It's possible no location data exists yet
             console.log('No location data yet');
             setBusLocation(null);
         }
     };
 
-    // Poll for location updates if a bus is selected
     useEffect(() => {
         let interval;
         if (selectedBus) {
-            fetchBusLocation(selectedBus.trip_id); // Fetch immediately
+            fetchBusLocation(selectedBus.trip_id);
             interval = setInterval(() => {
                 fetchBusLocation(selectedBus.trip_id);
-            }, 5000); // Poll every 5 seconds
+            }, 5000);
         }
         return () => clearInterval(interval);
     }, [selectedBus]);
 
     return (
-        <div style={{ background: 'var(--bg-body)', minHeight: 'calc(100vh - 74px)', overflowX: 'hidden' }}>
-            {/* Background Decorations */}
+        <div style={{ background: 'var(--bg-body)', minHeight: 'calc(100vh - 67px)', overflowX: 'hidden' }}>
+            {/* Background Decorations - Orange themed */}
             <div style={{
                 position: 'fixed',
                 top: '-10%',
                 right: '-5%',
                 width: '40%',
                 height: '40%',
-                background: 'radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(249, 115, 22, 0.05) 0%, transparent 70%)',
                 zIndex: 0,
                 pointerEvents: 'none'
             }}></div>
@@ -119,26 +110,26 @@ const PassengerBusSearch = () => {
                 left: '-5%',
                 width: '30%',
                 height: '30%',
-                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(250, 204, 21, 0.05) 0%, transparent 70%)',
                 zIndex: 0,
                 pointerEvents: 'none'
             }}></div>
 
-            <div className="container" style={{ padding: '2.5rem 1.5rem', position: 'relative', zIndex: 1 }}>
-                <div className="flex justify-between items-end" style={{ marginBottom: '3rem' }}>
+            <div className="container" style={{ padding: '2rem 1.5rem', position: 'relative', zIndex: 1 }}>
+                <div className="flex justify-between items-end" style={{ marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <div className="animate-slide-in">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                            <span className="badge badge-primary">Passenger Dashboard</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                            <span className="badge badge-primary">🚌 Passenger Dashboard</span>
                             <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border)' }}></span>
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '500' }}>Live Updates</span>
                         </div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
+                        <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
                             Where to <span style={{ color: 'var(--primary)', position: 'relative' }}>
                                 Next?
                                 <span style={{ position: 'absolute', bottom: '4px', left: 0, width: '100%', height: '8px', background: 'var(--primary-glow)', zIndex: -1 }}></span>
                             </span>
                         </h1>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Find and track your transit in real-time</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.5rem' }}>Find and track your transit in real-time</p>
                     </div>
                     
                     <div className="flex gap-4 items-center">
@@ -167,7 +158,7 @@ const PassengerBusSearch = () => {
 
                 <div className="flex gap-8 flex-col lg-flex-row" style={{ alignItems: 'stretch' }}>
                     {/* Left Panel: Search & Results */}
-                    <div style={{ flex: '1', minWidth: '360px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div style={{ flex: '1', minWidth: '0', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         <div className="card glass-card hover-lift" style={{ padding: '2rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                                 <div style={{ 
@@ -175,7 +166,7 @@ const PassengerBusSearch = () => {
                                     background: 'var(--gradient-main)', 
                                     borderRadius: '12px', 
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+                                    boxShadow: 'var(--shadow-orange)'
                                 }}>
                                     <span style={{ fontSize: '1.25rem' }}>🔍</span>
                                 </div>
@@ -204,7 +195,7 @@ const PassengerBusSearch = () => {
                             <div id="search-results" className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                                 <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                                    <div style={{ padding: '1.5rem', background: 'rgba(37,99,235,0.02)', borderBottom: '1px solid var(--border)' }}>
+                                    <div style={{ padding: '1.25rem 1.5rem', background: 'rgba(249, 115, 22, 0.03)', borderBottom: '1px solid var(--border)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                             <div className="status-dot active"></div>
                                             <h3 style={{ fontSize: '1.1rem' }}>Available Fleet</h3>
@@ -220,7 +211,7 @@ const PassengerBusSearch = () => {
                         )}
                         
                         {!isTrackingMode && routes.length === 0 && !error && (
-                            <div className="info-card animate-pulse" style={{ background: 'rgba(37,99,235,0.03)', border: '1px dashed var(--primary)', textAlign: 'center', padding: '2rem' }}>
+                            <div className="info-card animate-pulse" style={{ border: '1px dashed var(--primary)', textAlign: 'center', padding: '2rem' }}>
                                 <p style={{ fontSize: '0.95rem', color: 'var(--primary)', fontWeight: '500' }}>
                                     {!searchPerformed ? 
                                         "Enter your origin and destination above to see real-time bus availability." : 
@@ -229,45 +220,39 @@ const PassengerBusSearch = () => {
                                 </p>
                             </div>
                         )}
-                        
-                        {!isTrackingMode && routes.length === 0 && !error && !loading && searchPerformed && (
-                           <div style={{ padding: '1rem', textAlign: 'center' }}>
-                               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                   {/* Extra space for visual balance when no results */}
-                               </p>
-                           </div>
-                        )}
                     </div>
 
                     {/* Right Panel: Map & Tracking */}
-                    <div style={{ flex: '2', minWidth: '400px' }}>
+                    <div style={{ flex: '2', minWidth: '0' }}>
                         <div className="card glass-card" style={{ 
                             padding: '0', 
                             overflow: 'hidden', 
                             height: '100%', 
-                            minHeight: '650px', 
+                            minHeight: '550px', 
                             display: 'flex', 
                             flexDirection: 'column',
                             boxShadow: 'var(--shadow-xl)',
-                            border: '1px solid rgba(255,255,255,0.6)'
+                            border: '1px solid rgba(249, 115, 22, 0.1)'
                         }}>
                             {isTrackingMode ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                                     <div style={{
-                                        padding: '1.25rem 2rem',
+                                        padding: '1rem 1.5rem',
                                         background: 'rgba(255,255,255,0.9)',
-                                        borderBottom: '1px solid var(--border)',
+                                        borderBottom: '2px solid rgba(249, 115, 22, 0.15)',
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        backdropFilter: 'blur(10px)'
+                                        backdropFilter: 'blur(10px)',
+                                        flexWrap: 'wrap',
+                                        gap: '0.5rem'
                                     }}>
                                         <div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                                <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>Live Tracking</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                                                <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>🟢 Live Tracking</span>
                                                 {selectedBus && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>#{selectedBus.bus_number}</span>}
                                             </div>
-                                            <h4 style={{ fontSize: '1.25rem', fontWeight: '700' }}>
+                                            <h4 style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', fontWeight: '700' }}>
                                                 {selectedBus ? `${selectedBus.source} → ${selectedBus.destination}` : 'Awaiting Vehicle Selection'}
                                             </h4>
                                         </div>
@@ -282,14 +267,14 @@ const PassengerBusSearch = () => {
                                                 </div>
                                             ) : (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <div className="spinner-sm" style={{ borderColor: 'var(--border)', borderTopColor: 'var(--text-muted)' }}></div>
+                                                    <div className="spinner-sm" style={{ borderColor: 'var(--border)', borderTopColor: 'var(--primary)' }}></div>
                                                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Connecting...</span>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     
-                                    <div style={{ flex: 1, position: 'relative', background: '#e5e7eb', minHeight: '550px' }}>
+                                    <div style={{ flex: 1, position: 'relative', background: '#e5e7eb', minHeight: '450px' }}>
                                         <MapTracking busLocation={busLocation} selectedBus={selectedBus} />
                                         
                                         {!selectedBus && (
@@ -303,7 +288,7 @@ const PassengerBusSearch = () => {
                                                 justifyContent: 'center',
                                                 zIndex: 10,
                                                 textAlign: 'center',
-                                                padding: '3rem'
+                                                padding: '2rem'
                                             }}>
                                                 <div className="card" style={{ maxWidth: '320px', boxShadow: 'var(--shadow-lg)' }}>
                                                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚌</div>
@@ -322,12 +307,13 @@ const PassengerBusSearch = () => {
                                         {selectedBus && busLocation && (
                                             <div className="animate-slide-in" style={{
                                                 position: 'absolute',
-                                                bottom: '2rem',
-                                                left: '2rem',
+                                                bottom: '1.5rem',
+                                                left: '1.5rem',
                                                 zIndex: 10,
-                                                width: '280px'
+                                                width: '260px',
+                                                maxWidth: 'calc(100% - 3rem)'
                                             }}>
-                                                <div className="card glass-card" style={{ padding: '1.25rem', border: '1px solid rgba(255,255,255,0.8)' }}>
+                                                <div className="card glass-card" style={{ padding: '1.25rem', border: '1px solid rgba(249, 115, 22, 0.15)' }}>
                                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                                         <div className="icon icon-primary" style={{ borderRadius: '10px' }}>🚌</div>
                                                         <div>
@@ -335,8 +321,8 @@ const PassengerBusSearch = () => {
                                                             <div style={{ fontSize: '1rem', fontWeight: '800' }}>{selectedBus.bus_number}</div>
                                                         </div>
                                                     </div>
-                                                    <div className="divider" style={{ margin: '1rem 0', opacity: 0.5 }}></div>
-                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                    <div className="divider" style={{ margin: '0.75rem 0', opacity: 0.5 }}></div>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                                                         <div>
                                                             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700' }}>LATITUDE</div>
                                                             <div style={{ fontSize: '0.85rem', fontWeight: '600', fontFamily: 'monospace' }}>{Number(busLocation.latitude).toFixed(4)}</div>
@@ -352,28 +338,27 @@ const PassengerBusSearch = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem', textAlign: 'center', position: 'relative' }}>
+                                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 2rem', textAlign: 'center', position: 'relative' }}>
                                     <div style={{
-                                        width: '120px', height: '120px',
-                                        background: 'var(--bg-body)',
-                                        borderRadius: '32px',
+                                        width: '100px', height: '100px',
+                                        background: 'var(--gradient-main)',
+                                        borderRadius: '28px',
                                         marginBottom: '2rem',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '3.5rem',
-                                        boxShadow: 'var(--shadow-md)',
+                                        fontSize: '3rem',
+                                        boxShadow: 'var(--shadow-orange)',
                                         transform: 'rotate(-5deg)'
                                     }}>📍</div>
-                                    <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', fontWeight: '800' }}>Interactive Transit Map</h2>
-                                    <p style={{ color: 'var(--text-muted)', maxWidth: '400px', fontSize: '1.1rem', lineHeight: '1.6' }}>
+                                    <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.8rem)', marginBottom: '1rem', fontWeight: '800' }}>Interactive Transit Map</h2>
+                                    <p style={{ color: 'var(--text-muted)', maxWidth: '400px', fontSize: '1rem', lineHeight: '1.6' }}>
                                         Complete the search to unlock live GPS satellite tracking of the entire active fleet.
                                     </p>
-                                    <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
-                                        <span className="badge badge-outline">Live GPS</span>
-                                        <span className="badge badge-outline">Real-time ETA</span>
-                                        <span className="badge badge-outline">Fleet Status</span>
+                                    <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                        <span className="badge badge-outline">🛰️ Live GPS</span>
+                                        <span className="badge badge-outline">⏱️ Real-time ETA</span>
+                                        <span className="badge badge-outline">🚌 Fleet Status</span>
                                     </div>
                                     
-                                    {/* Abstract Map Background Illustration */}
                                     <div style={{
                                         position: 'absolute',
                                         inset: 0,
@@ -390,6 +375,5 @@ const PassengerBusSearch = () => {
         </div>
     );
 };
-
 
 export default PassengerBusSearch;

@@ -43,7 +43,7 @@ const DriverDashboard = () => {
                         } else {
                             if (attempts < maxRetries) {
                                 setTrackingError(`Accuracy low (${Math.round(accuracy)}m). Fetching high-accuracy GPS location... (Attempt ${attempts + 1}/${maxRetries})`);
-                                setTimeout(attemptFetch, 2000); // 2-second delay between retries
+                                setTimeout(attemptFetch, 2000);
                             } else {
                                 reject(new Error("Please move outdoors for better GPS signal. Enable High Accuracy Mode in device location settings."));
                             }
@@ -129,10 +129,8 @@ const DriverDashboard = () => {
     useEffect(() => {
         let intervalId;
         if (activeTrip && isTracking) {
-            // Fetch immediately
             fetchAndUpdateLocation();
             
-            // Then every 10 seconds
             intervalId = setInterval(() => {
                 fetchAndUpdateLocation();
             }, 10000);
@@ -151,7 +149,7 @@ const DriverDashboard = () => {
         }
 
         try {
-            const position = await getAccurateLocation(2); // Fewer retries for interval tracking
+            const position = await getAccurateLocation(2);
             const { latitude, longitude } = position.coords;
             setCurrentLocation({ latitude, longitude });
             setTrackingError('');
@@ -171,13 +169,11 @@ const DriverDashboard = () => {
     const startTrip = async () => {
         if (!selectedBus || !selectedRoute) return;
 
-        // If location is already captured, use it directly.
         if (currentLocation) {
             startTripWithLocation(currentLocation.latitude, currentLocation.longitude);
             return;
         }
 
-        // Fallback: fetch exactly on click if not already available
         if (!navigator.geolocation) {
             alert("Geolocation is not supported. Cannot start trip without location.");
             return;
@@ -209,9 +205,9 @@ const DriverDashboard = () => {
                 start_lng: longitude
             });
             setActiveTrip({ trip_id: res.data.tripId, bus_id: selectedBus, route_id: selectedRoute });
-            setIsTracking(true); // Automatically start tracking
+            setIsTracking(true);
             setLoading(false);
-            fetchAllActiveTrips(); // Refresh the list
+            fetchAllActiveTrips();
         } catch (error) {
             console.error('Error starting trip', error);
             setLoading(false);
@@ -226,9 +222,8 @@ const DriverDashboard = () => {
             setActiveTrip(null);
             setIsTracking(false);
             setCurrentLocation(null);
-            // Fetch initial location again for next trip
             fetchInitialLocation(); 
-            fetchAllActiveTrips(); // Refresh the list
+            fetchAllActiveTrips();
         } catch (error) {
             console.error('Error ending trip', error);
         }
@@ -241,7 +236,6 @@ const DriverDashboard = () => {
         try {
             await api.put(`/trips/${tripId}/end`);
             
-            // If the ended trip is the current active trip, clear it
             if (activeTrip && activeTrip.trip_id === tripId) {
                 setActiveTrip(null);
                 setIsTracking(false);
@@ -249,7 +243,6 @@ const DriverDashboard = () => {
                 fetchInitialLocation();
             }
             
-            // Refresh the list after animation delay
             setTimeout(() => {
                 setAllActiveTrips(prev => prev.filter(t => t.trip_id !== tripId));
                 setEndingTripId(null);
@@ -282,11 +275,10 @@ const DriverDashboard = () => {
         activeBusData = buses.find(b => b.bus_id === activeTrip.bus_id);
     }
     
-    // Combine for MapTracking selectedBus format (needs start_lat/lng and dest_lat/lng)
     const combinedMapData = activeRouteData && activeBusData ? {
         bus_id: activeBusData.bus_id,
         trip_id: activeTrip.trip_id,
-        start_lat: currentLocation ? currentLocation.latitude : activeRouteData.source_lat, // fallback to something if needed
+        start_lat: currentLocation ? currentLocation.latitude : activeRouteData.source_lat,
         start_lng: currentLocation ? currentLocation.longitude : activeRouteData.source_lng,
         dest_lat: activeRouteData.dest_lat,
         dest_lng: activeRouteData.dest_lng 
@@ -298,9 +290,9 @@ const DriverDashboard = () => {
                 {/* Header */}
                 <div className="animate-fade-in" style={{ marginBottom: '2rem', textAlign: 'center' }}>
                     <h1 style={{
-                        fontSize: '2.5rem',
+                        fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
                         fontWeight: '800',
-                        background: 'linear-gradient(to right, var(--primary), var(--success))',
+                        background: 'var(--gradient-main)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         marginBottom: '0.5rem'
@@ -314,9 +306,9 @@ const DriverDashboard = () => {
 
                 {activeTrip ? (
                     <div className="animate-fade-in">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
                             {/* Left Column: Controls and Status */}
-                            <div className="card glass-card" style={{ padding: '2.5rem', textAlign: 'center' }}>
+                            <div className="card glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
                                 <div className="icon icon-lg" style={{
                                     margin: '0 auto 1.5rem',
                                     background: 'var(--gradient-success)',
@@ -329,7 +321,7 @@ const DriverDashboard = () => {
                                     {isTracking ? '📡' : '⏸️'}
                                 </div>
 
-                                <h2 style={{ color: isTracking ? 'var(--success)' : 'var(--warning)', marginBottom: '1rem', fontSize: '1.75rem' }}>
+                                <h2 style={{ color: isTracking ? 'var(--success)' : 'var(--warning)', marginBottom: '1rem', fontSize: '1.5rem' }}>
                                     {isTracking ? 'Live Tracking Active' : 'Tracking Paused'}
                                 </h2>
 
@@ -345,7 +337,7 @@ const DriverDashboard = () => {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Current Location</span>
                                         <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>
-                                            {currentLocation ? `${currentLocation.latitude.toFixed(5)}, ${currentLocation.longitude.toFixed(5)}` : 'Waitings...'}
+                                            {currentLocation ? `${currentLocation.latitude.toFixed(5)}, ${currentLocation.longitude.toFixed(5)}` : 'Waiting...'}
                                         </span>
                                     </div>
                                     {trackingError && (
@@ -381,7 +373,6 @@ const DriverDashboard = () => {
                             {/* Right Column: Live Map */}
                             <div className="card glass-card" style={{ overflow: 'hidden', padding: '0' }}>
                                 <div style={{ height: '100%', minHeight: '400px', width: '100%' }}>
-                                    {/* Map Component */}
                                     <MapTracking 
                                         busLocation={currentLocation} 
                                         selectedBus={combinedMapData} 
@@ -406,7 +397,7 @@ const DriverDashboard = () => {
                             <div className="input-group" style={{ textAlign: 'left' }}>
                                 <label className="input-label">📍 Device Location</label>
                                 {fetchingLocation ? (
-                                    <div style={{ padding: '0.75rem', background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)', borderRadius: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ padding: '0.75rem', background: 'rgba(249, 115, 22, 0.08)', color: 'var(--primary)', borderRadius: '8px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }}></div>
                                         Fetching your real-time GPS location...
                                     </div>
@@ -485,11 +476,11 @@ const DriverDashboard = () => {
                 )}
 
                 {/* Active Trips Section */}
-                <div className="animate-fade-in" style={{ marginTop: '4rem' }}>
-                    <div className="section-header" style={{ justifyContent: 'space-between' }}>
+                <div className="animate-fade-in" style={{ marginTop: '3rem' }}>
+                    <div className="section-header" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <span className="section-icon">🔥</span>
-                            <h2 style={{ fontSize: '1.75rem' }}>Active Trips</h2>
+                            <h2 style={{ fontSize: '1.5rem' }}>Active Trips</h2>
                         </div>
                         <button 
                             onClick={fetchAllActiveTrips} 
@@ -513,14 +504,14 @@ const DriverDashboard = () => {
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>All buses are currently idle.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                             {allActiveTrips.map((trip) => (
                                 <div 
                                     key={trip.trip_id} 
                                     className={`card glass-card hover-lift ${endingTripId === trip.trip_id ? 'animate-fade-out' : ''}`}
                                     style={{ 
                                         padding: '1.5rem', 
-                                        borderLeft: '4px solid var(--success)',
+                                        borderLeft: '4px solid var(--primary)',
                                         opacity: endingTripId === trip.trip_id ? 0 : 1,
                                         transition: 'all 0.5s ease'
                                     }}

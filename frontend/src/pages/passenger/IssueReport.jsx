@@ -22,7 +22,7 @@ const IssueReport = () => {
 
     const handleTypeChange = (e) => {
         setIssueType(e.target.value);
-        setIssueOption(''); // Reset option when type changes
+        setIssueOption('');
     };
 
     const handleSubmit = async (e) => {
@@ -52,22 +52,39 @@ const IssueReport = () => {
     };
 
     return (
-        <div style={{ background: 'var(--bg-body)', minHeight: 'calc(100vh - 74px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: 'var(--bg-body)', minHeight: 'calc(100vh - 67px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="container" style={{ padding: '2rem 1.5rem', maxWidth: '600px', width: '100%' }}>
                 <div className="card glass-card animate-fade-in" style={{ padding: '2.5rem' }}>
                     <div className="text-center" style={{ marginBottom: '2rem' }}>
+                        <div style={{
+                            width: '56px', height: '56px',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            borderRadius: '16px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '1.75rem', margin: '0 auto 1rem',
+                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                        }}>⚠️</div>
                         <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Report an Issue</h2>
                         <p style={{ color: 'var(--text-muted)' }}>Help us improve your transit experience</p>
                         {busId && (
                             <p style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: '600', marginTop: '0.5rem' }}>
-                                Reporting for Selected Vehicle (ID: {busId})
+                                🚌 Reporting for Selected Vehicle (ID: {busId})
                             </p>
                         )}
                     </div>
 
                     {error && (
-                        <div style={{ color: 'var(--danger)', marginBottom: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
-                            {error}
+                        <div style={{ 
+                            color: 'var(--danger)', 
+                            marginBottom: '1rem', 
+                            textAlign: 'center', 
+                            fontSize: '0.9rem',
+                            padding: '0.75rem',
+                            background: 'rgba(239, 68, 68, 0.08)',
+                            borderRadius: 'var(--radius)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                        }}>
+                            ❌ {error}
                         </div>
                     )}
 
@@ -80,7 +97,7 @@ const IssueReport = () => {
                     ) : (
                         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                             <div className="input-group">
-                                <label className="input-label">Issue Type</label>
+                                <label className="input-label">📋 Issue Type</label>
                                 <select
                                     className="input-field"
                                     value={issueType}
@@ -97,7 +114,7 @@ const IssueReport = () => {
 
                             {issueType && (
                                 <div className="input-group animate-fade-in">
-                                    <label className="input-label">Specific Issue</label>
+                                    <label className="input-label">🔍 Specific Issue</label>
                                     <select
                                         className="input-field"
                                         value={issueOption}
@@ -114,32 +131,32 @@ const IssueReport = () => {
                             )}
 
                             <div className="input-group">
-                                <label className="input-label">Additional Comments (Optional)</label>
+                                <label className="input-label">💬 Additional Comments (Optional)</label>
                                 <textarea
                                     className="input-field"
                                     placeholder="Provide more context..."
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    style={{ minHeight: '100px', resize: 'vertical', paddingTop: '0.5rem' }}
+                                    style={{ minHeight: '100px', resize: 'vertical', paddingTop: '0.75rem' }}
                                 />
                             </div>
 
-                            <div className="flex gap-4" style={{ marginTop: '1rem' }}>
+                            <div className="flex gap-4" style={{ marginTop: '1rem', flexWrap: 'wrap' }}>
                                 <button
                                     type="button"
                                     className="btn btn-outline"
                                     onClick={() => navigate('/passenger/search')}
-                                    style={{ flex: 1 }}
+                                    style={{ flex: 1, minWidth: '120px' }}
                                 >
-                                    Cancel
+                                    ← Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     className="btn btn-primary"
                                     disabled={loading || !issueOption}
-                                    style={{ flex: 1 }}
+                                    style={{ flex: 1, minWidth: '120px' }}
                                 >
-                                    {loading ? 'Submitting...' : 'Submit Report'}
+                                    {loading ? '⏳ Submitting...' : '📨 Submit Report'}
                                 </button>
                             </div>
                         </form>

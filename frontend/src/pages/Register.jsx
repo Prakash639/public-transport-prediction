@@ -22,9 +22,17 @@ const Register = () => {
     };
 
     return (
-        <div className="container flex justify-center items-center" style={{ minHeight: '80vh', padding: '2rem 1rem' }}>
+        <div className="container flex justify-center items-center" style={{ minHeight: 'calc(100vh - 67px)', padding: '2rem 1rem' }}>
             <div className="card glass-card animate-fade-in" style={{ width: '100%', maxWidth: '440px', padding: '2.5rem' }}>
                 <div className="text-center" style={{ marginBottom: '2rem' }}>
+                    <div style={{
+                        width: '56px', height: '56px',
+                        background: 'var(--gradient-main)',
+                        borderRadius: '16px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '1.75rem', margin: '0 auto 1rem',
+                        boxShadow: 'var(--shadow-orange)'
+                    }}>🚌</div>
                     <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Join SmartTransit</h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Create your account to start your journey</p>
                 </div>
@@ -35,12 +43,12 @@ const Register = () => {
                         marginBottom: '1.5rem',
                         textAlign: 'center',
                         padding: '0.75rem',
-                        background: '#fef2f2',
+                        background: 'rgba(239, 68, 68, 0.08)',
                         borderRadius: 'var(--radius)',
                         fontSize: '0.875rem',
-                        border: '1px solid #fee2e2'
+                        border: '1px solid rgba(239, 68, 68, 0.2)'
                     }}>
-                        {error}
+                        ⚠️ {error}
                     </div>
                 )}
 
@@ -103,7 +111,7 @@ const Register = () => {
                                         borderRadius: 'var(--radius)',
                                         cursor: 'pointer',
                                         textAlign: 'center',
-                                        background: role === roleOption.value ? 'rgba(37, 99, 235, 0.05)' : 'transparent',
+                                        background: role === roleOption.value ? 'rgba(249, 115, 22, 0.06)' : 'transparent',
                                         transition: 'all 0.2s ease'
                                     }}
                                     className="hover-lift"
@@ -124,7 +132,7 @@ const Register = () => {
                     </div>
 
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
-                        {role === 'passenger' ? 'Create Account' : `Create ${role.charAt(0).toUpperCase() + role.slice(1)} Account`}
+                        {role === 'passenger' ? '🚀 Create Account' : `🚀 Create ${role.charAt(0).toUpperCase() + role.slice(1)} Account`}
                     </button>
 
                     <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
@@ -135,6 +143,5 @@ const Register = () => {
         </div>
     );
 };
-
 
 export default Register;

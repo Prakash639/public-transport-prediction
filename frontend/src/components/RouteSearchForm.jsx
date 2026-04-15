@@ -46,7 +46,7 @@ const RouteSearchForm = ({ routes, onRouteSelect, loading }) => {
                         top: '50%',
                         transform: 'translateY(-50%)',
                         pointerEvents: 'none',
-                        color: 'var(--text-muted)'
+                        color: 'var(--primary)'
                     }}>
                         ▼
                     </div>

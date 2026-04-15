@@ -96,12 +96,12 @@ const AdminDashboard = () => {
         <div style={{ background: 'var(--bg-body)', minHeight: '100vh', paddingBottom: '4rem' }}>
             <div className="container" style={{ paddingTop: '2rem' }}>
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6 animate-fade-in">
+                <div className="flex justify-between items-center mb-6 animate-fade-in" style={{ flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
                         <h1 style={{
-                            fontSize: '2.5rem',
+                            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
                             fontWeight: '800',
-                            background: 'linear-gradient(to right, var(--primary), #8b5cf6)',
+                            background: 'var(--gradient-main)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             marginBottom: '0.5rem'
@@ -130,14 +130,14 @@ const AdminDashboard = () => {
                         <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--success)' }}>{stats.totalRoutes}</h3>
                     </div>
                     <div className="stat-card">
-                        <div className="icon icon-lg" style={{ margin: '0 auto 1rem', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>🚀</div>
+                        <div className="icon icon-warning icon-lg" style={{ margin: '0 auto 1rem' }}>🚀</div>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Trips</p>
-                        <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#8b5cf6' }}>{stats.activeTrips}</h3>
+                        <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--accent)' }}>{stats.activeTrips}</h3>
                     </div>
                     <div className="stat-card">
-                        <div className="icon icon-lg" style={{ margin: '0 auto 1rem', background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)' }}>⚠️</div>
+                        <div className="icon icon-danger icon-lg" style={{ margin: '0 auto 1rem' }}>⚠️</div>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending Issues</p>
-                        <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--warning)' }}>
+                        <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--danger)' }}>
                             {issues.filter(i => i.status === 'Pending').length}
                         </h3>
                     </div>
@@ -152,16 +152,16 @@ const AdminDashboard = () => {
 
                 {/* Issue Management Section */}
                 <div className="card glass-card mb-8 animate-slide-in" style={{ padding: '2rem' }}>
-                    <div className="section-header">
+                    <div className="section-header" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                         <span className="section-icon">📋</span>
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: '200px' }}>
                             <h2 style={{ fontSize: '1.5rem' }}>Issue Management</h2>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: 0 }}>Review and resolve reported issues</p>
                         </div>
                         <span className="badge badge-primary">{issues.length} Total</span>
                     </div>
 
-                    <div style={{ overflowX: 'auto' }}>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                         <table className="data-table">
                             <thead>
                                 <tr>
@@ -220,7 +220,7 @@ const AdminDashboard = () => {
                                                     value={actionNotes[issue.id] || ''}
                                                     onChange={(e) => handleNoteChange(issue.id, e.target.value)}
                                                 />
-                                                <div className="flex gap-1">
+                                                <div className="flex gap-1" style={{ flexWrap: 'wrap' }}>
                                                     <button className="btn btn-primary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }} onClick={() => handleIssueAction(issue.id, 'Approved')}>✓ Approve</button>
                                                     <button className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }} onClick={() => handleIssueAction(issue.id, 'In Progress')}>⚙️ Work</button>
                                                     <button className="btn" style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', border: '1px solid var(--success)' }} onClick={() => handleIssueAction(issue.id, 'Resolved')}>✓ Done</button>
@@ -303,7 +303,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                         {stats.users.map((u, i) => (
-                            <div key={i} className="stat-card" style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)', borderColor: 'rgba(37, 99, 235, 0.2)' }}>
+                            <div key={i} className="stat-card" style={{ background: 'rgba(249, 115, 22, 0.03)', borderColor: 'rgba(249, 115, 22, 0.15)' }}>
                                 <div className="icon icon-primary icon-lg" style={{ margin: '0 auto 0.75rem' }}>
                                     {u.role === 'admin' ? '👨‍💼' : u.role === 'driver' ? '🚗' : '👤'}
                                 </div>
@@ -321,4 +321,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
